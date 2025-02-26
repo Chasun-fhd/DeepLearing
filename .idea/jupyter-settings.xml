@@ -1,14 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="JupyterPersistentConnectionParameters">
+    <option name="knownRemoteServers">
+      <list>
+        <JupyterConnectionParameters>
+          <option name="authType" value="notebook" />
+          <option name="token" value="31d80d1093304334c75ed9eb27d3edb66ea27e611cfecb3b" />
+          <option name="urlString" value="http://127.0.0.1:8888" />
+          <authParams2>
+            <map>
+              <entry key="token" value="31d80d1093304334c75ed9eb27d3edb66ea27e611cfecb3b" />
+            </map>
+          </authParams2>
+        </JupyterConnectionParameters>
+      </list>
+    </option>
     <option name="moduleParameters">
       <map>
         <entry key="$PROJECT_DIR$/.idea/DeepLearing.iml">
           <value>
             <JupyterConnectionParameters>
-              <option name="argv" value="jupyterlab --no-browser" />
-              <option name="managed" value="true" />
-              <option name="sdkName" value="" />
+              <option name="authType" value="notebook" />
+              <option name="token" value="31d80d1093304334c75ed9eb27d3edb66ea27e611cfecb3b" />
+              <option name="urlString" value="http://127.0.0.1:8888" />
+              <authParams2>
+                <map>
+                  <entry key="token" value="31d80d1093304334c75ed9eb27d3edb66ea27e611cfecb3b" />
+                </map>
+              </authParams2>
             </JupyterConnectionParameters>
           </value>
         </entry>
