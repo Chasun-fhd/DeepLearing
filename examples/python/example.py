@@ -1,4 +1,6 @@
-import torch
-a = torch.arange(10, dtype=torch.long)
-print(a)
-print(a.unsqueeze(0))
+def echo(*input, **kwargs):
+    print(input, type(input))
+    print(kwargs, type(kwargs))
+
+
+echo("aaa",{"name":"lily"}, name="aab")
