@@ -89,9 +89,9 @@ class Utils(object):
         for batch_idx in range(batch_size):
             ex_labels, ex_preds = [], []
             for seq_idx in range(seq_len):
-                if label_ids[batch_idx][seq_idx] != -100:
+                if label_ids[batch_idx, seq_idx] != -100:
                     ex_labels.append(self.idx2tag()[label_ids[batch_idx][seq_idx]])
-                    ex_preds.append(preds[batch_idx][seq_idx])
+                    ex_preds.append(self.idx2tag()[preds[batch_idx][seq_idx]])
             label_list.append(ex_labels)
             pred_list.append(ex_preds)
 
@@ -103,15 +103,23 @@ class Utils(object):
 
 
 def train(num_epochs=3, batch_size=24):
-    base_model_name = 'xlm_roberta_base'
+
     lang = 'zh'
-    xlmr_config = AutoConfig.from_pretrained(base_model_name)
-    xlmr_tokenizer = AutoTokenizer.from_pretrained(base_model_name)
 
     dataset = load_dataset('xtreme', name=f'PAN-X.{lang}')
     encoded_dataset = encode_panx_dataset(dataset)
     print('encoded_dataset', encoded_dataset)
     print('encoded_dataset features', encoded_dataset.features)
+
+    tags = dataset['train'].features['ner_tags'].feature
+
+    index2tag = {idx: tag for idx, tag in enumerate(tags.names)}
+    tag2index = {tag: idx for idx, tag in enumerate(tags.names)}
+
+    base_model_name = 'xlm-roberta-base'
+    xlmr_config = AutoConfig.from_pretrained(base_model_name, num_labels=tags.num_classes, id2label=index2tag,
+                                             label2id=tag2index)
+    xlmr_tokenizer = AutoTokenizer.from_pretrained(base_model_name)
 
     logging_steps = len(encoded_dataset) // batch_size
     model_name = f'{base_model_name}-finetuned-panx-{lang}'
@@ -136,7 +144,7 @@ def train(num_epochs=3, batch_size=24):
     trainer = Trainer(model_init=model_init, args=training_args, data_collator=data_collator,
                       compute_metrics=utils.compute_metrics, train_dataset=encoded_dataset['train'],
                       eval_dataset=encoded_dataset['validation'])
-    print(f'Begining to train: {base_model_name}')
+    print(f'Begin to train: {base_model_name}')
     trainer.train()
     print(f'End to train: {base_model_name}')
 
