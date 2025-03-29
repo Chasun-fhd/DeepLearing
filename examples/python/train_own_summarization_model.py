@@ -5,10 +5,17 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 import torch
 import evaluate
 from matplotlib import pyplot as plt
+import os
+os.environ['HF_HOME'] = '/root/autodl-tmp/cache/'
 
+data_json_files = {
+    "train":"/root/autodl-tmp/cache/hub/datasets--samsum/train.json",
+    "test":"/root/autodl-tmp/cache/hub/datasets--samsum/test.json",
+    "val":"/root/autodl-tmp/cache/hub/datasets--samsum/val.json"
+}
 
 def lookup_dataset():
-    dataset_samsum = load_dataset("samsum")
+    dataset_samsum = load_dataset("json", data_files=data_json_files)
     split_lengths = [len(dataset_samsum[split]) for split in
                      dataset_samsum]
     print(f"Split lengths: {split_lengths}")
@@ -110,7 +117,7 @@ def train_entrance():
     Finetune pegasus
     :return:
     """
-    dataset_samsum = load_dataset("samsum")
+    dataset_samsum = load_dataset("json", data_files=data_json_files)
 
     rouge_names = ["rouge1", "rouge2", "rougeL", "rougeLsum"]
 
@@ -139,7 +146,7 @@ def train_entrance():
                                        column_text="dialogue",
                                        column_summary="summary",
                                        batch_size=8)
-    rouge_dict = dict((rn, score[rn].mid.fmeasure) for rn in
+    rouge_dict = dict((rn, score[rn]) for rn in
                       rouge_names)
     df = pd.DataFrame(rouge_dict, index=["pegasus"])
     print(df)
@@ -170,3 +177,6 @@ def train_entrance():
     rouge_dict = dict((rn, score[rn].mid.fmeasure) for rn in rouge_names)
     df = pd.DataFrame(rouge_dict, index=["pegasus"])
     print(df)
+
+
+train_entrance()
