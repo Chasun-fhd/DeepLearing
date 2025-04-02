@@ -5,17 +5,17 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 import torch
 import evaluate
 from matplotlib import pyplot as plt
-from rouge_score import rouge_scorer
+import os
+os.environ['HF_HOME'] = '/root/autodl-tmp/cache/'
 
+data_json_files = {
+    "train":"/root/autodl-tmp/cache/hub/datasets--samsum/train.json",
+    "test":"/root/autodl-tmp/cache/hub/datasets--samsum/test.json",
+    "val":"/root/autodl-tmp/cache/hub/datasets--samsum/val.json"
+}
 
 def lookup_dataset():
-    train_json_files = {
-        "train":"",
-        "test": "",
-        "val": "",
-    }
-    # dataset_samsum = load_dataset("samsum")
-    dataset_samsum = load_dataset("json", data_files=train_json_files)
+    dataset_samsum = load_dataset("json", data_files=data_json_files)
     split_lengths = [len(dataset_samsum[split]) for split in
                      dataset_samsum]
     print(f"Split lengths: {split_lengths}")
@@ -31,7 +31,7 @@ def lookup_dataset():
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model_ckpt = "google/pegasus-cnn_dailymail"
-tokenizer = AutoTokenizer.from_pretrained(model_ckpt, use_fast=False)
+tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
 
 
 def chunks(list_of_elements, batch_size):
@@ -64,9 +64,9 @@ def evaluate_summaries_pegasus(dataset, metric, model, tokenizer,
                          for s in summaries]
     decoded_summaries = [d.replace("<n>", " ") for d in
                          decoded_summaries]
-    # metric.add_batch(predictions=decoded_summaries,
-    #                  references=target_batch)
-    score = metric.compute(predictions=decoded_summaries, references=target_batches)
+    metric.add_batch(predictions=decoded_summaries,
+                     references=target_batch)
+    score = metric.compute()
     return score
 
 
@@ -117,7 +117,7 @@ def train_entrance():
     Finetune pegasus
     :return:
     """
-    dataset_samsum = load_dataset("samsum", trust_remote_code=True)
+    dataset_samsum = load_dataset("json", data_files=data_json_files)
 
     rouge_names = ["rouge1", "rouge2", "rougeL", "rougeLsum"]
 
@@ -146,7 +146,7 @@ def train_entrance():
                                        column_text="dialogue",
                                        column_summary="summary",
                                        batch_size=8)
-    rouge_dict = dict((rn, score[rn].mid.fmeasure) for rn in
+    rouge_dict = dict((rn, score[rn]) for rn in
                       rouge_names)
     df = pd.DataFrame(rouge_dict, index=["pegasus"])
     print(df)
@@ -179,7 +179,4 @@ def train_entrance():
     print(df)
 
 
-if __name__ == '__main__':
-    # train_entrance()
-    dataset_samsum = load_dataset("samsum", trust_remote_code=True)
-    print(dataset_samsum)
+train_entrance()
