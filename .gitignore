@@ -1,2 +1,4 @@
 .idea
 examples/.ipynb_checkpoints
+.venv
+*.pt
